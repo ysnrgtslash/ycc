@@ -15,16 +15,93 @@ typedef struct {
     char *input;
   } Token;
 
+enum {
+    ND_NUM=256,
+};
+
+typedef struct Node {
+    int ty;
+    struct Node *lhs;
+    struct Node *rhs;
+    int val;
+} Node;
+
+Node *new_node(int ty, Node *lhs, Node *rhs){
+    Node *node = malloc(sizeof(Node));
+    node->ty = ty;
+    node->lhs = lhs;
+    node->rhs = rhs;
+    return node;
+}
+
+Node *new_node_num(int val) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_NUM;
+    node->val=val;
+    return node;
+}
+
+Node *term();
+Node *add();
+Node *mul();
+void error(int i);
+
+
 Token tokens[100];
- 
+int pos=0;
+
+int consume(int ty){
+    if (tokens[pos].ty != ty )
+        return 0;
+    pos++;
+    return 1;
+}
+
+Node *term() {
+    if (consume('(')) {
+            Node *node = add();
+            if(!consume(')'))
+                error(tokens[pos].ty);
+            return node; 
+                }
+     if(tokens[pos].ty == TK_NUM)
+    return new_node_num(tokens[pos++].val);
+
+}
+
+
+Node *mul() {
+   Node *node =term();
+    for (;;) {
+        if (consume('*')) 
+            node=new_node('*', node, term()); 
+        else if (consume('/')) 
+            node=new_node('/', node, term());
+        else
+            return node;
+            }
+   return node;
+}
+	
+Node *add() { 
+    Node *node = mul();
+    for (;;) {
+        if (consume('+')) 
+            node=new_node('+', node, mul()); 
+        else if (consume('-')) 
+            node=new_node('-', node, mul());
+        else
+            return node;
+            }
+}
+
 void tokenize( char *p) {
-      int i=0;
+       int i=0;
       while (*p) {
           if(isspace(*p)){
               p++;
               continue;
           }
-
           if (*p == '+' || *p == '-') {
               tokens[i].ty=*p; // char doce 
               tokens[i].input = p;  // pointer of str
@@ -48,7 +125,7 @@ void tokenize( char *p) {
       tokens[i].input=p;
   }
 
-void error(int i) { fprintf(stderr, "unexpected token:%s\n", tokens[i].input);
+void error(int i) { fprintf(stderr, "can not tokenize:%s\n", tokens[i].input);
       exit(1);
  }
 
@@ -59,6 +136,7 @@ int main(int argc, char **argv) {
   }
   int i=0;
   tokenize(argv[1]);
+  Node *node=add();
 
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
