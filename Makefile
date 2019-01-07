@@ -1,3 +1,4 @@
+CFLAGS := -g
 ycc: ycc.c
 
 test: ycc
