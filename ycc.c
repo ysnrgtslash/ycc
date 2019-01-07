@@ -95,7 +95,7 @@ Node *mul() {
         else if (consume('/')) 
             node=new_node('/', node, term());
         else if (consume('=')) 
-            node=new_node('=', node, term());
+            node=new_node('=', node, add());
         else
             return node;
             }
