@@ -75,8 +75,20 @@ Node *mul() {
             node=new_node('*', node, term()); 
         else if (consume('/')) 
             node=new_node('/', node, term());
-        else if (consume('=')) 
-            node=new_node('=', node, add());
+        else if (consume('=')) {
+            if(consume('=')) {
+                node=new_node(ND_EQ,node,add());
+            } else {
+                node=new_node('=', node, add());
+                }
+            }
+        else if (consume('!')) {
+            if(consume('=')) {
+                node=new_node(ND_NONEQ,node,add());
+            } else {
+                error(100);
+            }
+        }
         else
             return node;
             }
@@ -115,7 +127,7 @@ void tokenize( char *p) {
               p++;
               continue;
           }
-          if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == ';' || *p == '=' ) {
+          if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == ';' || *p == '=' || *p == '!' ) {
               tokens[i].ty=*p; // char doce 
               tokens[i].input = *p;  // pointer of str
               p++;
